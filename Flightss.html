@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%);
+        }
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: absolute;
+                z-index: 10;
+            }
+            .sidebar.open {
+                transform: translateX(0); 
+            }
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Main Container -->
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white w-64 shadow-lg">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-blue-800">Flight Control</h1>
+                <p class="text-gray-500 text-sm">Dashboard v1.0</p>
+            </div>
+            <nav class="p-4">
+                <ul>
+                    <li class="mb-2">
+                        <a href="#" onclick="showPage('dashboard')" class="flex items-center p-2 text-blue-700 rounded-lg bg-blue-50">
+                            <i class="fas fa-chart-line mr-3"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" onclick="showPage('flights')" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                            <i class="fas fa-plane mr-3"></i>
+                            <span>Flights</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" onclick="showPage('pilots')" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                            <i class="fas fa-user-tie mr-3"></i>
+                            <span>Pilots</span>
+                        </a>
+                    </li>
+                    <li class="mb-2">
+                        <a href="#" onclick="showPage('reports')" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50">
+                            <i class="fas fa-file-alt mr-3"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t border-gray-200">
+                <button onclick="logout()" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50 w-full">
+                    <i class="fas fa-sign-out-alt mr-3"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-auto">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm">
+                <div class="flex justify-between items-center p-4">
+                    <div class="flex items-center">
+                        <button id="sidebarToggle" class="md:hidden mr-4 text-gray-600">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h2 class="text-xl font-semibold text-gray-800" id="pageTitle">Dashboard</h2>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="relative">
+                            <i class="fas fa-bell text-gray-600 text-xl"></i>
+                            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        </div>
+                        <div class="flex items-center">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="h-8 w-8 rounded-full">
+                            <span class="ml-2 font-medium">Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Pages -->
+            <main class="p-4">
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page active">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Total Flights</p>
+                                    <h3 class="text-2xl font-bold">142</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                    <i class="fas fa-plane text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-green-500 mt-2 text-sm">+12% from last month</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Active Pilots</p>
+                                    <h3 class="text-2xl font-bold">28</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                    <i class="fas fa-user-tie text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-green-500 mt-2 text-sm">+3 from last month</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Flight Hours</p>
+                                    <h3 class="text-2xl font-bold">1,248</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                    <i class="fas fa-clock text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-red-500 mt-2 text-sm">-5% from last month</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-gray-500">Locations</p>
+                                    <h3 class="text-2xl font-bold">16</h3>
+                                </div>
+                                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                    <i class="fas fa-map-marker-alt text-xl"></i>
+                                </div>
+                            </div>
+                            <p class="text-green-500 mt-2 text-sm">+2 new locations</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow lg:col-span-2">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Recent Flights</h3>
+                                <button class="text-blue-600 text-sm">View All</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead>
+                                        <tr class="border-b">
+                                            <th class="text-left py-2 px-4">Flight ID</th>
+                                            <th class="text-left py-2 px-4">Pilot</th>
+                                            <th class="text-left py-2 px-4">Location</th>
+                                            <th class="text-left py-2 px-4">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">FL-2023-045</td>
+                                            <td class="py-3 px-4">John Smith</td>
+                                            <td class="py-3 px-4">New York</td>
+                                            <td class="py-3 px-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Completed</span></td>
+                                        </tr>
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">FL-2023-046</td>
+                                            <td class="py-3 px-4">Sarah Johnson</td>
+                                            <td class="py-3 px-4">London</td>
+                                            <td class="py-3 px-4"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">In Progress</span></td>
+                                        </tr>
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">FL-2023-047</td>
+                                            <td class="py-3 px-4">Michael Brown</td>
+                                            <td class="py-3 px-4">Tokyo</td>
+                                            <td class="py-3 px-4"><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">Scheduled</span></td>
+                                        </tr>
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="py-3 px-4">FL-2023-048</td>
+                                            <td class="py-3 px-4">Emma Wilson</td>
+                                            <td class="py-3 px-4">Sydney</td>
+                                            <td class="py-3 px-4"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Cancelled</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold">Upcoming Flights</h3>
+                                <button class="text-blue-600 text-sm">View All</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                    <p class="font-medium">FL-2023-049</p>
+                                    <p class="text-sm text-gray-600">John Smith - Dubai</p>
+                                    <p class="text-xs text-gray-500">Today, 14:30 - 18:45 (4h 15m)</p>
+                                </div>
+                                <div class="border-l-4 border-green-500 pl-4 py-2">
+                                    <p class="font-medium">FL-2023-050</p>
+                                    <p class="text-sm text-gray-600">Lisa Ray - Paris</p>
+                                    <p class="text-xs text-gray-500">Tomorrow, 09:15 - 12:30 (3h 15m)</p>
+                                </div>
+                                <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                    <p class="font-medium">FL-2023-051</p>
+                                    <p class="text-sm text-gray-600">Robert Taylor - Singapore</p>
+                                    <p class="text-xs text-gray-500">Tomorrow, 16:00 - 23:30 (7h 30m)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flights Page -->
+                <div id="flights" class="page">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                            <h2 class="text-xl font-semibold mb-4 md:mb-0">Flight Management</h2>
+                            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 w-full md:w-auto">
+                                <div class="relative flex-grow md:w-64">
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="text" id="flightSearch" placeholder="Search flights..." class="pl-10 pr-4 py-2 border rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500" oninput="filterFlights()">
+                                </div>
+                                <select id="locationFilter" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="filterFlights()">
+                                    <option value="">All Locations</option>
+                                    <option value="New York">New York</option>
+                                    <option value="London">London</option>
+                                    <option value="Tokyo">Tokyo</option>
+                                    <option value="Sydney">Sydney</option>
+                                    <option value="Dubai">Dubai</option>
+                                    <option value="Paris">Paris</option>
+                                    <option value="Singapore">Singapore</option>
+                                </select>
+                                <button onclick="showAddFlightModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                                    <i class="fas fa-plus mr-2"></i> Add Flight
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-3 px-4">Flight ID</th>
+                                        <th class="text-left py-3 px-4">Start Time</th>
+                                        <th class="text-left py-3 px-4">Duration</th>
+                                        <th class="text-left py-3 px-4">Pilot</th>
+                                        <th class="text-left py-3 px-4">Location</th>
+                                        <th class="text-left py-3 px-4">Status</th>
+                                        <th class="text-left py-3 px-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="flightTableBody">
+                                    <!-- Flight data will be inserted here by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-4">
+                            <div class="text-sm text-gray-600">
+                                Showing <span id="showingFrom">1</span> to <span id="showingTo">10</span> of <span id="totalFlights">25</span> flights
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 border rounded-lg hover:bg-gray-100" onclick="prevPage()">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button class="px-3 py-1 border rounded-lg hover:bg-gray-100" onclick="nextPage()">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pilots Page -->
+                <div id="pilots" class="page">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-xl font-semibold mb-6">Pilot Management</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Pilot cards will be inserted here by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div id="reports" class="page">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h2 class="text-xl font-semibold mb-6">Reports & Analytics</h2>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white p-4 rounded-lg border">
+                                <h3 class="font-medium mb-4">Flights by Location</h3>
+                                <div class="h-64" id="locationChart"></div>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border">
+                                <h3 class="font-medium mb-4">Flight Hours by Pilot</h3>
+                                <div class="h-64" id="pilotChart"></div>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border lg:col-span-2">
+                                <h3 class="font-medium mb-4">Monthly Flight Activity</h3>
+                                <div class="h-64" id="monthlyChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="gradient-bg p-6 rounded-t-lg">
+                <h2 class="text-2xl font-bold text-white text-center">Flight Control Login</h2>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label for="loginEmail" class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your email">
+                </div>
+                <div class="mb-6">
+                    <label for="loginPassword" class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your password">
+                </div>
+                <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg mb-4">
+                    Login
+                </button>
+                <div class="text-center">
+                    <p class="text-gray-600">Don't have an account? <a href="#" onclick="showSignup()" class="text-blue-600 hover:underline">Sign up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signup Page -->
+    <div id="signupPage" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="gradient-bg p-6 rounded-t-lg">
+                <h2 class="text-2xl font-bold text-white text-center">Create Account</h2>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label for="signupName" class="block text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="signupName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your full name">
+                </div>
+                <div class="mb-4">
+                    <label for="signupEmail" class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="signupEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your email">
+                </div>
+                <div class="mb-4">
+                    <label for="signupPassword" class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="signupPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Create a password">
+                </div>
+                <div class="mb-6">
+                    <label for="signupConfirmPassword" class="block text-gray-700 mb-2">Confirm Password</label>
+                    <input type="password" id="signupConfirmPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirm your password">
+                </div>
+                <button onclick="signup()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg mb-4">
+                    Sign Up
+                </button>
+                <div class="text-center">
+                    <p class="text-gray-600">Already have an account? <a href="#" onclick="showLogin()" class="text-blue-600 hover:underline">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Flight Modal -->
+    <div id="addFlightModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center border-b p-4">
+                <h3 class="text-lg font-semibold">Add New Flight</h3>
+                <button onclick="hideAddFlightModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Pilot</label>
+                    <select id="flightPilot" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Pilot</option>
+                        <!-- Pilots will be added by JavaScript -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Location</label>
+                    <select id="flightLocation" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Location</option>
+                        <option value="New York">New York</option>
+                        <option value="London">London</option>
+                        <option value="Tokyo">Tokyo</option>
+                        <option value="Sydney">Sydney</option>
+                        <option value="Dubai">Dubai</option>
+                        <option value="Paris">Paris</option>
+                        <option value="Singapore">Singapore</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Start Time</label>
+                    <input type="datetime-local" id="flightStartTime" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Duration (hours)</label>
+                    <input type="number" id="flightDuration" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter duration in hours">
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button onclick="hideAddFlightModal()" class="px-4 py-2 border rounded-lg hover:bg-gray-100">
+                        Cancel
+                    </button>
+                    <button onclick="addFlight()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                        Save Flight
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock database
+        const mockDatabase = {
+            users: [
+                { id: 1, name: "Admin", email: "admin@flightcontrol.com", password: "admin123" }
+            ],
+            pilots: [
+                { id: 1, name: "John Smith", license: "ATP-12345", totalHours: 1250, status: "Active" },
+                { id: 2, name: "Sarah Johnson", license: "ATP-23456", totalHours: 980, status: "Active" },
+                { id: 3, name: "Michael Brown", license: "ATP-34567", totalHours: 750, status: "Active" },
+                { id: 4, name: "Emma Wilson", license: "ATP-45678", totalHours: 1100, status: "Active" },
+                { id: 5, name: "Robert Taylor", license: "ATP-56789", totalHours: 650, status: "Active" },
+                { id: 6, name: "Lisa Ray", license: "ATP-67890", totalHours: 890, status: "Active" }
+            ],
+            flights: [
+                { id: "FL-2023-045", pilotId: 1, startTime: "2023-06-15T08:30:00", duration: 4.5, location: "New York", status: "Completed" },
+                { id: "FL-2023-046", pilotId: 2, startTime: "2023-06-15T12:15:00", duration: 3.25, location: "London", status: "In Progress" },
+                { id: "FL-2023-047", pilotId: 3, startTime: "2023-06-16T09:00:00", duration: 5.75, location: "Tokyo", status: "Scheduled" },
+                { id: "FL-2023-048", pilotId: 4, startTime: "2023-06-14T14:45:00", duration: 2.5, location: "Sydney", status: "Cancelled" },
+                { id: "FL-2023-049", pilotId: 1, startTime: "2023-06-17T14:30:00", duration: 4.25, location: "Dubai", status: "Scheduled" },
+                { id: "FL-2023-050", pilotId: 6, startTime: "2023-06-18T09:15:00", duration: 3.25, location: "Paris", status: "Scheduled" },
+                { id: "FL-2023-051", pilotId: 5, startTime: "2023-06-18T16:00:00", duration: 7.5, location: "Singapore", status: "Scheduled" },
+                { id: "FL-2023-052", pilotId: 2, startTime: "2023-06-19T11:00:00", duration: 2.75, location: "London", status: "Scheduled" },
+                { id: "FL-2023-053", pilotId: 3, startTime: "2023-06-20T07:30:00", duration: 6, location: "Tokyo", status: "Scheduled" },
+                { id: "FL-2023-054", pilotId: 4, startTime: "2023-06-21T13:45:00", duration: 3.5, location: "Sydney", status: "Scheduled" }
+            ]
+        };
+
+        // Current user and pagination
+        let currentUser = null;
+        let currentPage = 1;
+        const flightsPerPage = 5;
+        let filteredFlights = [...mockDatabase.flights];
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const loggedInUser = localStorage.getItem('flightControlUser');
+            if (loggedInUser) {
+                currentUser = JSON.parse(loggedInUser);
+                showDashboard();
+            } else {
+                showLogin();
+            }
+
+            // Setup sidebar toggle for mobile
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.querySelector('.sidebar').classList.toggle('open');
+            });
+
+            // Load initial data
+            loadFlights();
+            loadPilots();
+            updatePaginationInfo();
+        });
+
+        // Page navigation functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+            document.getElementById('pageTitle').textContent = document.querySelector(`#${pageId} h2`).textContent;
+            
+            // Close sidebar on mobile after navigation
+            if (window.innerWidth <= 768) {
+                document.querySelector('.sidebar').classList.remove('open');
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('signupPage').classList.add('hidden');
+            showPage('dashboard');
+        }
+
+        function showLogin() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('signupPage').classList.add('hidden');
+        }
+
+        function showSignup() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('signupPage').classList.remove('hidden');
+        }
+
+        // Authentication functions
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = mockDatabase.users.find(u => u.email === email && u.password === password);
+            if (user) {
+                currentUser = user;
+                localStorage.setItem('flightControlUser', JSON.stringify(user));
+                showDashboard();
+            } else {
+                alert('Invalid email or password');
+            }
+        }
+
+        function signup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            // Check if email already exists
+            const emailExists = mockDatabase.users.some(u => u.email === email);
+            if (emailExists) {
+                alert('Email already registered');
+                return;
+            }
+            
+            // Add new user (in a real app, this would be an API call)
+            const newUser = {
+                id: mockDatabase.users.length + 1,
+                name: name,
+                email: email,
+                password: password
+            };
+            mockDatabase.users.push(newUser);
+            
+            // Log the user in
+            currentUser = newUser;
+            localStorage.setItem('flightControlUser', JSON.stringify(newUser));
+            showDashboard();
+        }
+
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('flightControlUser');
+            showLogin();
+        }
+
+        // Flight management functions
+        function loadFlights() {
+            const tableBody = document.getElementById('flightTableBody');
+            tableBody.innerHTML = '';
+            
+            const startIndex = (currentPage - 1) * flightsPerPage;
+            const endIndex = Math.min(startIndex + flightsPerPage, filteredFlights.length);
+            
+            for (let i = startIndex; i < endIndex; i++) {
+                const flight = filteredFlights[i];
+                const pilot = mockDatabase.pilots.find(p => p.id === flight.pilotId);
+                
+                const startTime = new Date(flight.startTime);
+                const formattedDate = startTime.toLocaleDateString();
+                const formattedTime = startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const row = document.createElement('tr');
+                row.className = 'border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="py-3 px-4">${flight.id}</td>
+                    <td class="py-3 px-4">${formattedDate} ${formattedTime}</td>
+                    <td class="py-3 px-4">${flight.duration} hours</td>
+                    <td class="py-3 px-4">${pilot ? pilot.name : 'Unknown'}</td>
+                    <td class="py-3 px-4">${flight.location}</td>
+                    <td class="py-3 px-4">
+                        <span class="${getStatusClass(flight.status)} px-2 py-1 rounded-full text-xs">
+                            ${flight.status}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <button class="text-blue-600 hover:text-blue-800 mr-2" onclick="editFlight('${flight.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800" onclick="deleteFlight('${flight.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            }
+            
+            updatePaginationInfo();
+        }
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'Completed': return 'bg-green-100 text-green-800';
+                case 'In Progress': return 'bg-blue-100 text-blue-800';
+                case 'Scheduled': return 'bg-yellow-100 text-yellow-800';
+                case 'Cancelled': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        function filterFlights() {
+            const searchTerm = document.getElementById('flightSearch').value.toLowerCase();
+            const locationFilter = document.getElementById('locationFilter').value;
+            
+            filteredFlights = mockDatabase.flights.filter(flight => {
+                const pilot = mockDatabase.pilots.find(p => p.id === flight.pilotId);
+                const matchesSearch = 
+                    flight.id.toLowerCase().includes(searchTerm) ||
+                    (pilot && pilot.name.toLowerCase().includes(searchTerm)) ||
+                    flight.location.toLowerCase().includes(searchTerm);
+                
+                const matchesLocation = locationFilter ? flight.location === locationFilter : true;
+                
+                return matchesSearch && matchesLocation;
+            });
+            
+            currentPage = 1;
+            loadFlights();
+        }
+
+        function updatePaginationInfo() {
+            document.getElementById('showingFrom').textContent = (currentPage - 1) * flightsPerPage + 1;
+            document.getElementById('showingTo').textContent = Math.min(currentPage * flightsPerPage, filteredFlights.length);
+            document.getElementById('totalFlights').textContent = filteredFlights.length;
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadFlights();
+            }
+        }
+
+        function nextPage() {
+            if (currentPage * flightsPerPage < filteredFlights.length) {
+                currentPage++;
+                loadFlights();
+            }
+        }
+
+        function showAddFlightModal() {
+            const pilotSelect = document.getElementById('flightPilot');
+            pilotSelect.innerHTML = '<option value="">Select Pilot</option>';
+            
+            mockDatabase.pilots.forEach(pilot => {
+                const option = document.createElement('option');
+                option.value = pilot.id;
+                option.textContent = pilot.name;
+                pilotSelect.appendChild(option);
+            });
+            
+            document.getElementById('addFlightModal').classList.remove('hidden');
+        }
+
+        function hideAddFlightModal() {
+            document.getElementById('addFlightModal').classList.add('hidden');
+        }
+
+        function addFlight() {
+            const pilotId = parseInt(document.getElementById('flightPilot').value);
+            const location = document.getElementById('flightLocation').value;
+            const startTime = document.getElementById('flightStartTime').value;
+            const duration = parseFloat(document.getElementById('flightDuration').value);
+            
+            if (!pilotId || !location || !startTime || !duration) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            // Generate new flight ID
+            const newId = `FL-${new Date().getFullYear()}-${(mockDatabase.flights.length + 1).toString().padStart(3, '0')}`;
+            
+            // Add new flight (in a real app, this would be an API call)
+            const newFlight = {
+                id: newId,
+                pilotId: pilotId,
+                startTime: startTime,
+                duration: duration,
+                location: location,
+                status: "Scheduled"
+            };
+            mockDatabase.flights.push(newFlight);
+            
+            // Refresh flights table
+            filteredFlights = [...mockDatabase.flights];
+            currentPage = Math.ceil(mockDatabase.flights.length / flightsPerPage);
+            loadFlights();
+            
+            // Hide modal and reset form
+            hideAddFlightModal();
+            document.getElementById('flightPilot').value = '';
+            document.getElementById('flightLocation').value = '';
+            document.getElementById('flightStartTime').value = '';
+            document.getElementById('flightDuration').value = '';
+        }
+
+        function editFlight(flightId) {
+            alert(`Edit flight ${flightId} - This would open an edit modal in a real application`);
+        }
+
+        function deleteFlight(flightId) {
+            if (confirm(`Are you sure you want to delete flight ${flightId}?`)) {
+                // Delete flight (in a real app, this would be an API call)
+                const index = mockDatabase.flights.findIndex(f => f.id === flightId);
+                if (index !== -1) {
+                    mockDatabase.flights.splice(index, 1);
+                }
+                
+                // Refresh flights table
+                filteredFlights = [...mockDatabase.flights];
+                if (currentPage > 1 && (currentPage - 1) * flightsPerPage >= filteredFlights.length) {
+                    currentPage--;
+                }
+                loadFlights();
+            }
+        }
+
+        // Pilot management functions
+        function loadPilots() {
+            const pilotsContainer = document.querySelector('#pilots .grid');
+            pilotsContainer.innerHTML = '';
+            
+            mockDatabase.pilots.forEach(pilot => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow';
+                card.innerHTML = `
+                    <div class="p-4 border-b">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-lg">${pilot.name}</h3>
+                                <p class="text-gray-600 text-sm">${pilot.license}</p>
+                            </div>
+                            <span class="px-2 py-1 text-xs rounded-full ${pilot.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${pilot.status}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-gray-600">Total Hours:</span>
+                            <span class="font-medium">${pilot.totalHours}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Current Flights:</span>
+                            <span class="font-medium">${mockDatabase.flights.filter(f => f.pilotId === pilot.id && f.status === 'In Progress').length}</span>
+                        </div>
+                    </div>
+                    <div class="px-4 py-3 bg-gray-50 flex justify-end space-x-2">
+                        <button class="text-blue-600 hover:text-blue-800 px-3 py-1 rounded">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="text-red-600 hover:text-red-800 px-3 py-1 rounded">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                pilotsContainer.appendChild(card);
+            });
+        }
+
+        // Simple chart rendering (in a real app, you would use a library like Chart.js)
+        function renderCharts() {
+            // Location chart data
+            const locationCounts = {};
+            mockDatabase.flights.forEach(flight => {
+                locationCounts[flight.location] = (locationCounts[flight.location] || 0) + 1;
+            });
+            
+            // Pilot hours data
+            const pilotHours = {};
+            mockDatabase.pilots.forEach(pilot => {
+                pilotHours[pilot.name] = pilot.totalHours;
+            });
+            
+            // Monthly activity data
+            const monthlyActivity = {
+                'Jan': 120, 'Feb': 135, 'Mar': 110, 'Apr': 145, 
+                'May': 160, 'Jun': 95, 'Jul': 105, 'Aug': 130,
+                'Sep': 125, 'Oct': 140, 'Nov': 150, 'Dec': 115
+            };
+            
+            // In a real app, you would use a charting library here
+            document.getElementById('locationChart').innerHTML = `
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fas fa-chart-pie text-4xl mb-2"></i>
+                    <p>Location Distribution Chart</p>
+                    <p class="text-xs mt-2">(Would show pie chart in a real app)</p>
+                </div>
+            `;
+            
+            document.getElementById('pilotChart').innerHTML = `
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fas fa-chart-bar text-4xl mb-2"></i>
+                    <p>Pilot Hours Chart</p>
+                    <p class="text-xs mt-2">(Would show bar chart in a real app)</p>
+                </div>
+            `;
+            
+            document.getElementById('monthlyChart').innerHTML = `
+                <div class="text-center py-10 text-gray-500">
+                    <i class="fas fa-chart-line text-4xl mb-2"></i>
+                    <p>Monthly Activity Chart</p>
+                    <p class="text-xs mt-2">(Would show line chart in a real app)</p>
+                </div>
+            `;
+        }
+
+        // Show reports page with charts
+        document.getElementById('reports').addEventListener('click', function() {
+            renderCharts();
+        });
+    </script>
+</body>
+</html>
